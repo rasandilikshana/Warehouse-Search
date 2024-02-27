@@ -1,79 +1,49 @@
-version: "3.9"
-
-networks:
-    laravel:
-        name: laravel
+version: '3'
 
 services:
+  app:
+    build:
+      context: .
+    ports:
+      - "8000:9000"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_KEY=base64:xnjtUpdrC2V8q4URN2MbzNlEMHr9CBZnB2WwwzoNMko=
+      - APP_DEBUG=true
+      - APP_URL=http://localhost
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=search_ncgws
+      - DB_USERNAME=root
+      - DB_PASSWORD=
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailpit
+      - MAIL_PORT=1025
+      - MAIL_USERNAME=null
+      - MAIL_PASSWORD=null
+      - MAIL_ENCRYPTION=null
+      - MAIL_FROM_ADDRESS=hello@example.com
+      - MAIL_FROM_NAME=Laravel
+      - AWS_ACCESS_KEY_ID=
+      - AWS_SECRET_ACCESS_KEY=
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_BUCKET=
+      - AWS_USE_PATH_STYLE_ENDPOINT=false
 
-    nginx:
-        build:
-            context: .
-            dockerfile: nginx.dockerfile
-        depends_on:
-            - php
-            - mysql
-        container_name: nginx
-        ports:
-            - 80:80
-            - 443:443
-        volumes:
-            - ./src:/var/www/html
-        networks:
-            - laravel
+  db:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: search_ncgws
+      MYSQL_ROOT_PASSWORD: root
 
-    php:
-        build:
-            context: .
-            dockerfile: php.dockerfile
-        container_name: php
-        volumes:
-            - ./src:/var/www/html
-        networks:
-            - laravel
-
-    mysql:
-        image: mysql:8.0.27
-        container_name: mysql
-        ports:
-            - 3306:3306
-        volumes:
-            - ./mysql:/var/lib/mysql
-        environment:
-            MYSQL_DATABASE: laraveldb
-            MYSQL_USER: laravel
-            MYSQL_PASSWORD: secret
-            MYSQL_ROOT_PASSWORD: secret
-        networks:
-            - laravel
-
-    composer:
-        image: composer:latest
-        container_name: composer
-        volumes:
-            - ./src:/var/www/html
-        working_dir: /var/www/html
-        networks:
-            - laravel
-
-    artisan:
-        build:
-            context: .
-            dockerfile: php.dockerfile
-        container_name: artisan
-        volumes:
-            - ./src:/var/www/html
-        working_dir: /var/www/html
-        entrypoint: ['php', 'artisan']
-        networks:
-            - laravel
-
-    npm:
-        image: node:current-alpine
-        container_name: npm
-        volumes:
-            - ./src:/var/www/html
-        working_dir: /var/www/html
-        entrypoint: ['npm']
-        networks:
-            - laravel
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
