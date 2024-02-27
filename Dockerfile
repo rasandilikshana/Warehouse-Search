@@ -4,6 +4,16 @@ FROM php:8.0-fpm
 # Set working directory
 WORKDIR /var/www/html
 
+# Add a non-root user
+RUN groupadd -g 1000 appuser && \
+    useradd -r -u 1000 -g appuser appuser
+
+# Change ownership of the application directory
+RUN chown -R appuser:appuser /var/www/html
+
+# Switch to the non-root user
+USER appuser
+
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     git \
